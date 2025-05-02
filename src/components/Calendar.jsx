@@ -16,12 +16,10 @@ const Calendar = () => {
   const [selectedDate, setSelectedDate] = useState(null);
 
   const monthStartday = startOfMonth(today);
-  console.log(monthStartday+"is monthStartday")
   const monthEndday = endOfMonth(today);
   const days = eachDayOfInterval({ start: monthStartday, end: monthEndday });
 
   const firstDayOfMonth = monthStartday.getDay();
-  console.log(firstDayOfMonth)
   const paddingDays = Array(firstDayOfMonth).fill(null);
 
   const currentYear = new Date().getFullYear();
@@ -36,9 +34,9 @@ const Calendar = () => {
     setToday(addMonths(today, 1));
   };
 
-     const prevMonth = () => {
-        setToday(subMonths(today, 1));
-     };
+  const prevMonth = () => {
+    setToday(subMonths(today, 1));
+  };
 
   const handleYearChange = (e) => {
     const newYear = parseInt(e.target.value);
@@ -73,72 +71,73 @@ const Calendar = () => {
     dispatch(addEvent(newEvent));
   };
 
- 
-
   return (
-    <div className="max-w-5xl w-5xl mx-auto p-5 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-5">
-        <button 
-          onClick={prevMonth}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-        >
-          &lt;
-        </button>
-        <div className="flex items-center gap-4">
-          <select 
-            value={today.getFullYear()} 
-            onChange={handleYearChange}
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+    <div className="w-full bg-white rounded-lg shadow-md p-2 sm:p-5">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button 
+            onClick={prevMonth}
+            className="bg-green-500 text-white p-2 rounded hover:bg-green-600 transition-colors"
           >
-            {years.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-          <select 
-            value={today.getMonth()} 
-            onChange={handleMonthChange}
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            &lt;
+          </button>
+          <div className="flex items-center gap-2 flex-1 sm:flex-none">
+            <select 
+              value={today.getFullYear()} 
+              onChange={handleYearChange}
+              className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto"
+            >
+              {years.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            <select 
+              value={today.getMonth()} 
+              onChange={handleMonthChange}
+              className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto"
+            >
+              {months.map((month, index) => (
+                <option key={month} value={index}>{month}</option>
+              ))}
+            </select>
+          </div>
+          <button 
+            onClick={nextMonth}
+            className="bg-green-500 text-white p-2 rounded hover:bg-green-600 transition-colors"
           >
-            {months.map((month, index) => (
-              <option key={month} value={index}>{month}</option>
-            ))}
-          </select>
+            &gt;
+          </button>
         </div>
-        <button 
-          onClick={nextMonth}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-        >
-          &gt;
-        </button>
       </div>
+
       <div className="flex flex-col">
         <div className="grid grid-cols-7 gap-1 mb-2">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="text-center font-semibold text-gray-600 py-2">
+            <div key={day} className="text-center text-xs sm:text-sm font-semibold text-gray-600 py-1">
               {day}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1 min-h-[600px]">
+        <div className="grid grid-cols-7 gap-1 min-h-[400px] sm:min-h-[600px]">
           {paddingDays.map((_, index) => (
             <div
               key={`padding-${index}`}
-              className="min-h-[120px] p-2 border border-gray-200 rounded bg-gray-50"
+              className="min-h-[60px] sm:min-h-[120px] p-1 sm:p-2 border border-gray-200 rounded bg-gray-50"
             />
           ))}
           {days.map((day, index) => {
-
             const dayEvents = getEventsForDate(day);
             return (
               <div
                 key={index}
                 onClick={() => handleDayClick(day)}
-                className={`min-h-[120px] p-2 border border-gray-200 rounded relative cursor-pointer hover:bg-gray-50 transition-colors  ${!isSameMonth(day, today) ? 'opacity-50' : ''}`}
-                style={{borderTop:`${isToday(day)?"4px solid blue":""}`}}
+                className={`min-h-[60px] sm:min-h-[120px] p-1 sm:p-2 border border-gray-200 rounded relative cursor-pointer hover:bg-gray-50 transition-colors ${
+                  !isSameMonth(day, today) ? 'opacity-50' : ''
+                }`}
+                style={{borderTop: `${isToday(day) ? "4px solid blue" : ""}`}}
               >
-
                 <div className="flex justify-between items-start">
-                  <span className="font-semibold">
+                  <span className="text-xs sm:text-sm font-semibold">
                     {format(day, 'd')}
                   </span>
                   {!isBefore(startOfDay(day), startOfDay(new Date())) && (
@@ -147,18 +146,17 @@ const Calendar = () => {
                         e.stopPropagation();
                         handleAddEvent(day);
                       }}
-                      className="text-gray-500 hover:text-green-500 transition-colors text-sm"
-                      
+                      className="text-gray-500 hover:text-green-500 transition-colors text-xs sm:text-sm"
                     >
                       +
                     </button>
                   )}
                 </div>
-                <div className="flex flex-col gap-1 mt-1">
+                <div className="flex flex-col gap-0.5 sm:gap-1 mt-0.5 sm:mt-1">
                   {dayEvents.slice(0, 2).map((event, eventIndex) => (
                     <div
                       key={eventIndex}
-                      className={`px-2 py-1 rounded text-black text-xs truncate`}
+                      className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded text-black text-[10px] sm:text-xs truncate`}
                       style={{
                         borderLeft: `2px solid ${event.color}`,
                         backgroundColor: `${event.color}2A`
@@ -168,7 +166,7 @@ const Calendar = () => {
                     </div>
                   ))}
                   {dayEvents.length > 2 && (
-                    <div className="text-xs text-gray-500 text-center">
+                    <div className="text-[10px] sm:text-xs text-gray-500 text-center">
                       +{dayEvents.length - 2} more
                     </div>
                   )}
@@ -178,6 +176,7 @@ const Calendar = () => {
           })}
         </div>
       </div>
+
       <EventModal
         isOpen={isEventModalOpen}
         onClose={() => setIsEventModalOpen(false)}
