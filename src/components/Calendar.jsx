@@ -72,14 +72,14 @@ const Calendar = () => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-md p-2 sm:p-5">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+    <div className="h-[calc(100vh-64px)] flex flex-col bg-white rounded-lg shadow-md">
+      <div className="flex flex-col sm:flex-row justify-between items-center py-2 sm:p-4 border-b">
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button 
             onClick={prevMonth}
             className="bg-green-500 text-white p-2 rounded hover:bg-green-600 transition-colors"
           >
-            &lt;
+          &lt;
           </button>
           <div className="flex items-center gap-2 flex-1 sm:flex-none">
             <select 
@@ -110,70 +110,76 @@ const Calendar = () => {
         </div>
       </div>
 
-      <div className="flex flex-col">
-        <div className="grid grid-cols-7 gap-1 mb-2">
+      {/* Calendar Grid - Scrollable */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {/* Day Headers - Fixed */}
+        <div className="grid grid-cols-7 gap-1 px-2 py-1 bg-white">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="text-center text-xs sm:text-sm font-semibold text-gray-600 py-1">
+            <div key={day} className="text-center text-xs sm:text-sm font-semibold text-gray-600">
               {day}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1 min-h-[400px] sm:min-h-[600px]">
-          {paddingDays.map((_, index) => (
-            <div
-              key={`padding-${index}`}
-              className="min-h-[60px] sm:min-h-[120px] p-1 sm:p-2 border border-gray-200 rounded bg-gray-50"
-            />
-          ))}
-          {days.map((day, index) => {
-            const dayEvents = getEventsForDate(day);
-            return (
+
+        {/* Days Grid - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-7 gap-1 p-2">
+            {paddingDays.map((_, index) => (
               <div
-                key={index}
-                onClick={() => handleDayClick(day)}
-                className={`min-h-[60px] sm:min-h-[120px] p-1 sm:p-2 border border-gray-200 rounded relative cursor-pointer hover:bg-gray-50 transition-colors ${
-                  !isSameMonth(day, today) ? 'opacity-50' : ''
-                }`}
-                style={{borderTop: `${isToday(day) ? "4px solid blue" : ""}`}}
-              >
-                <div className="flex justify-between items-start">
-                  <span className="text-xs sm:text-sm font-semibold">
-                    {format(day, 'd')}
-                  </span>
-                  {!isBefore(startOfDay(day), startOfDay(new Date())) && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddEvent(day);
-                      }}
-                      className="text-gray-500 hover:text-green-500 transition-colors text-xs sm:text-sm"
-                    >
-                      +
-                    </button>
-                  )}
+                key={`padding-${index}`}
+                className="min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 border border-gray-200 rounded bg-gray-50"
+              />
+            ))}
+            {days.map((day, index) => {
+              const dayEvents = getEventsForDate(day);
+              return (
+                <div
+                  key={index}
+                  onClick={() => handleDayClick(day)}
+                  className={`min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 border border-gray-200 rounded relative cursor-pointer hover:bg-gray-50 transition-colors ${
+                    !isSameMonth(day, today) ? 'opacity-50' : ''
+                  }`}
+                  style={{borderTop: `${isToday(day) ? "4px solid blue" : ""}`}}
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="text-xs sm:text-sm font-semibold">
+                      {format(day, 'd')}
+                    </span>
+                    {!isBefore(startOfDay(day), startOfDay(new Date())) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddEvent(day);
+                        }}
+                        className="text-gray-500 hover:text-green-500 transition-colors text-xs sm:text-sm"
+                      >
+                        +
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-0.5 sm:gap-1 mt-0.5 sm:mt-1">
+                    {dayEvents.slice(0, 2).map((event, eventIndex) => (
+                      <div
+                        key={eventIndex}
+                        className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded text-black text-[10px] sm:text-xs truncate`}
+                        style={{
+                          borderLeft: `2px solid ${event.color}`,
+                          backgroundColor: `${event.color}2A`
+                        }}
+                      >
+                        {event.title}
+                      </div>
+                    ))}
+                    {dayEvents.length > 2 && (
+                      <div className="text-[10px] sm:text-xs text-gray-500 text-center">
+                        +{dayEvents.length - 2} more
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex flex-col gap-0.5 sm:gap-1 mt-0.5 sm:mt-1">
-                  {dayEvents.slice(0, 2).map((event, eventIndex) => (
-                    <div
-                      key={eventIndex}
-                      className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded text-black text-[10px] sm:text-xs truncate`}
-                      style={{
-                        borderLeft: `2px solid ${event.color}`,
-                        backgroundColor: `${event.color}2A`
-                      }}
-                    >
-                      {event.title}
-                    </div>
-                  ))}
-                  {dayEvents.length > 2 && (
-                    <div className="text-[10px] sm:text-xs text-gray-500 text-center">
-                      +{dayEvents.length - 2} more
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 

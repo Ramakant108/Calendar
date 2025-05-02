@@ -16,7 +16,6 @@ function App() {
         </div>
 
         <div className="flex">
-          {/* Mobile Sidebar Overlay */}
           {isSidebarOpen && (
             <div 
               className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -24,15 +23,14 @@ function App() {
             />
           )}
           
-          {/* Sidebar */}
           <div className={`fixed lg:static top-[64px] h-[calc(100vh-64px)] z-40 transform transition-transform duration-300 ease-in-out ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}>
             <Sidebar />
           </div>
           
-          {/* Main Content */}
-          <div className="flex-1 p-4 w-full">
+          
+          <div className="flex-1 p-1 w-full">
             <Calendar />
           </div>
         </div>
