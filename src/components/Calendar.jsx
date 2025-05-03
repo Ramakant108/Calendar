@@ -66,7 +66,7 @@ const Calendar = () => {
     const newEvent = {
       ...eventData,
       id: uuidv4(),
-      date: selectedDate.toISOString()
+      date: format(selectedDate, 'yyyy-MM-dd')
     };
     dispatch(addEvent(newEvent));
   };
@@ -188,6 +188,7 @@ const Calendar = () => {
         onClose={() => setIsEventModalOpen(false)}
         selectedDate={selectedDate}
         onSave={handleSaveEvent}
+        existingEvents={events}
       />
       <DayEventsShow
         isOpen={isDayEventsModalOpen}

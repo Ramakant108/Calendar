@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { format } from 'date-fns';
 
-const EventModal = ({ isOpen, onClose, selectedDate, onSave }) => {
+const EventModal = ({ isOpen, onClose, selectedDate, onSave, existingEvents = [] }) => {
   const [eventData, setEventData] = useState({
     title: '',
     startTime: '',
     endTime: '',
     color: '#4CAF50'
   });
+  const [timeConflict, setTimeConflict] = useState(false);
 
   const colors = [
     { name: 'Green', value: '#4CAF50' },
@@ -16,11 +18,72 @@ const EventModal = ({ isOpen, onClose, selectedDate, onSave }) => {
     { name: 'Red', value: '#F44336' }
   ];
 
+  const checkTimeConflict = (startTime, endTime) => {
+
+    if (!startTime || !endTime) return false;
+
+    const convertToMinutes = (time) => {
+
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const newStartMinutes = convertToMinutes(startTime);
+    const newEndMinutes =convertToMinutes(endTime);
+
+
+    const formattedSelectedDate = format(selectedDate, 'yyyy-MM-dd');
+    const sameDayEvents = existingEvents.filter(event => event.date === formattedSelectedDate);
+
+    console.log('Selected Date:', formattedSelectedDate);
+
+    console.log('Same Day Events:', sameDayEvents);
+
+    console.log('New Event Time:', { startTime, endTime });
+
+    return sameDayEvents.some(event => {
+      const eventStartMinutes = convertToMinutes(event.startTime);
+      const eventEndMinutes = convertToMinutes(event.endTime);
+
+
+
+      console.log('Comparing with event:', {
+        title: event.title,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        startMinutes: eventStartMinutes,
+        endMinutes: eventEndMinutes
+      });
+
+      
+      const hasConflict = (
+        (newStartMinutes >= eventStartMinutes && newStartMinutes < eventEndMinutes) || (newEndMinutes > eventStartMinutes && newEndMinutes <= eventEndMinutes) ||(newStartMinutes <= eventStartMinutes && newEndMinutes >= eventEndMinutes) );
+
+      if (hasConflict) {
+        console.log('Conflict found with event:', event.title);
+      }
+
+      return hasConflict;
+    });
+  };
+
+  const handleTimeChange = (field, value) => {
+    const newEventData = { ...eventData, [field]: value };
+    setEventData(newEventData);
+    
+    if (newEventData.startTime && newEventData.endTime) {
+      const hasConflict = checkTimeConflict(newEventData.startTime, newEventData.endTime);
+      setTimeConflict(hasConflict);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (timeConflict) return;
+    
     onSave({
       ...eventData,
-      date: selectedDate
+      date: format(selectedDate, 'yyyy-MM-dd')
     });
     setEventData({
       title: '',
@@ -28,7 +91,18 @@ const EventModal = ({ isOpen, onClose, selectedDate, onSave }) => {
       endTime: '',
       color: '#4CAF50'
     });
-    console.log(eventData)
+    setTimeConflict(false);
+    onClose();
+  };
+
+  const handleClose = () => {
+    setEventData({
+      title: '',
+      startTime: '',
+      endTime: '',
+      color: '#4CAF50'
+    });
+    setTimeConflict(false);
     onClose();
   };
 
@@ -40,7 +114,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onSave }) => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Add New Event</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-500 hover:text-gray-700"
           >
             ✕
@@ -67,8 +141,8 @@ const EventModal = ({ isOpen, onClose, selectedDate, onSave }) => {
               <input
                 type="time"
                 value={eventData.startTime}
-                onChange={(e) => setEventData({ ...eventData, startTime: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                onChange={(e) => handleTimeChange('startTime', e.target.value)}
+                className={`w-full px-3 py-2 border ${timeConflict ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-green-500`}
                 required
               />
             </div>
@@ -79,12 +153,17 @@ const EventModal = ({ isOpen, onClose, selectedDate, onSave }) => {
               <input
                 type="time"
                 value={eventData.endTime}
-                onChange={(e) => setEventData({ ...eventData, endTime: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                onChange={(e) => handleTimeChange('endTime', e.target.value)}
+                className={`w-full px-3 py-2 border ${timeConflict ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-green-500`}
                 required
               />
             </div>
           </div>
+          {timeConflict && (
+            <p className="text-red-500 text-sm mt-1">
+              This time slot is full on {format(selectedDate, 'MMMM d, yyyy')}
+            </p>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Color
@@ -112,7 +191,15 @@ const EventModal = ({ isOpen, onClose, selectedDate, onSave }) => {
             >
               Cancel
             </button>
-            <button type="submit"className="px-4 py-2 text-white bg-green-500 rounded-md hover:bg-green-600">
+            <button 
+              type="submit"
+              disabled={timeConflict}
+              className={`px-4 py-2 text-white rounded-md ${
+                timeConflict 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-green-500 hover:bg-green-600'
+              }`}
+            >
               Save Event
             </button>
           </div>
